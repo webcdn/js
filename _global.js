@@ -35,6 +35,38 @@ function _GET(name, url) {
 }
 
 
+function siteLocalStorage(key, value){
+	// set the values
+	if( typeof value != 'undefined' ){
+		if( value === null ){
+			localStorage.removeItem(key);
+		}
+		else if( typeof key === 'object' && key !== null ){
+			Array.prototype.forEach.call(key, function(v, k){
+				localStorage.setItem(k, v);
+			});
+		}
+		else if( typeof key == 'string' ){
+			localStorage.setItem(key, value);
+		}
+	}
+
+	// get the values
+	if( Array.isArray(key) ){
+		var output = {};
+
+		Array.prototype.forEach.call(key, function(v, k){
+			output[k] = localStorage.getItem(v);
+		});
+
+		return output;
+	}
+	else {
+		return localStorage.getItem(key);
+	}
+}
+
+
 function urlLocation(href) {
 	var match = href.match(/^([^\:]+)\:\/?\/?(([^\:\/\?\#]*)(?:\:([0-9]+))?)([\/]{0,1}[^\?\#]*)(\?[^\#]*|)(\#.*|)$/mi);
 	return match && {
