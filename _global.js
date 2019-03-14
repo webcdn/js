@@ -1,3 +1,8 @@
+// if ( window.history.replaceState ) {
+// 	var path = window.location.href.replace(/(\?$|\?*\&*(?:success|error)\=[^&#\s]*|\&$)/gim, '');
+// 	window.history.replaceState( null, null, path);
+// }
+
 function nonce(){
 	return Math.random().toString(36).substring(2);
 }
@@ -151,16 +156,6 @@ function time_ago(time) {
 }
 
 
-function imgLazyLoad(){
-	[].forEach.call(document.querySelectorAll('img[data-src]'), function(img) {
-		img.setAttribute('src', img.getAttribute('data-src'));
-		img.onload = function() {
-			img.removeAttribute('data-src');
-		};
-	});
-}
-
-
 function autosize(elm){
 	elm = typeof elm == 'string' ? document.querySelector(elm) : this;
 	elm.style.cssText = 'height:auto; padding:0;';
@@ -170,6 +165,26 @@ function autosize(elm){
 }
 
 
+function imgLazyLoad(){
+	Array.prototype.forEach.call(document.querySelectorAll('img[data-src]'), function(el, i){
+		el.setAttribute('src', el.getAttribute('data-src'));
+		el.onload = function(){
+			el.removeAttribute('data-src');
+		};
+	});
+}
+
+
+function get_html(html, data = {}){
+	for (var key in data) {
+		if( data.hasOwnProperty(key) ){
+			var regex = new RegExp('{{' + key + '}}', 'g');
+			html = html.replace(regex, data[key]);
+		}
+	}
+
+	return html;
+}
 
 
 var ajax = {};
@@ -182,7 +197,7 @@ ajax.xhr = function () {
 		try {
 			_xhr = new ActiveXObject(_ver[i]);
 			break;
-		} catch (e) {}
+		} catch(err) {}
 	}
 	return _xhr;
 };
@@ -192,23 +207,49 @@ ajax.send = function (url, method, data, callback, async) {
 	xhr.open(method, url, typeof async == 'boolean' ? async : true);
 	xhr.onreadystatechange = function(){
 		xhr.readyState == 4 && callback(xhr.responseText);
-	}
+	};
 	method == 'POST' && xhr.setRequestHeader('Content-type', 'application/x-www-form-urlencoded');
-	xhr.send(data)
+	xhr.send(data);
 };
 
 
 
 
+var animationEnd = (function(el){
+	var animations = {
+		animation       : 'animationend',
+		OAnimation      : 'oAnimationEnd',
+		MozAnimation    : 'mozAnimationEnd',
+		WebkitAnimation : 'webkitAnimationEnd',
+	}
+
+	for (var i in animations){
+		if(el.style[i] !== undefined ){
+			return animations[i];
+		}
+	}
+}(document.createElement('div')));
+
+var transitionEnd = (function(el){
+	var transitions = {
+		transition       : 'transitionend',
+		OTransition      : 'oTransitionEnd',
+		MozTransition    : 'mozTransitionEnd',
+		WebkitTransition : 'webkitTransitionEnd',
+	}
+
+	for (var i in transitions){
+		if(el.style[i] !== undefined ){
+			return transitions[i];
+		}
+	}
+}(document.createElement('div')));
 
 
 
-
-
-
-
-///////////////////////////////////////
-///////////////////////////////////////
+///////////////////////////////////////////////////////////
+/// this functions needs modification as per the design ///
+///////////////////////////////////////////////////////////
 
 
 function toast(message, color = '', time = 5000) {
@@ -251,17 +292,6 @@ function toast(message, color = '', time = 5000) {
 }
 
 
-function get_html(html, data = {}){
-	for (var key in data) {
-		if( data.hasOwnProperty(key) ){
-			var regex = new RegExp('{{' + key + '}}', 'g');
-			html = html.replace(regex, data[key]);
-		}
-	}
-
-	return html;
-}
-
 function nav_menu(action = ''){
 	if( action == 'add' ) {
 		document.querySelector('header nav').classList.add('active');
@@ -276,4 +306,3 @@ function nav_menu(action = ''){
 		document.querySelector('svg.menu').classList.toggle('active');
 	}
 }
-
